@@ -18,21 +18,30 @@ public class BlackJack {
             return value + "-" + type;
         }
 
-        public int getValue(){
-            if("AJQK".contains(value)){ //A J K Q
-                if(value == "A"){
-                    return 11;
+        public int getValue() {
+            try {
+                if ("AJQK".contains(value)) {
+                    if ("A".equals(value)) {
+                        return 11;
+                    }
+                    return 10; // J, Q, K are worth 10
                 }
+                return Integer.parseInt(value); // 2-10
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid card value: " + value);
             }
-            return Integer.parseInt(value); //2-10
         }
 
         public boolean isAce(){
             return value == "A";
         }
 
-        public String getImagePath(){
-            return "./cards/" + toString() + ".png";
+        public String getImagePath() {
+            String path = "./cards/" + toString() + ".png";
+            if (getClass().getResource(path) == null) {
+                throw new RuntimeException("Card image not found: " + path);
+            }
+            return path;
         }
 
     }
@@ -149,6 +158,9 @@ public class BlackJack {
 
         hitButton.addActionListener(new ActionListener(){
             public void actionPerformed(ActionEvent e){
+                if (deck.isEmpty()) {
+                    throw new IllegalStateException("Deck is empty! Cannot draw more cards.");
+                }
                 Card card = deck.remove(deck.size()-1);
                 playerSum += card.getValue();
                 playerAceCount += card.isAce() ? 1 : 0;
@@ -166,6 +178,9 @@ public class BlackJack {
                 stayButton.setEnabled(false);
 
                 while(dealerSum < 17){
+                    if (deck.isEmpty()) {
+                        throw new IllegalStateException("Deck is empty! Cannot draw more cards.");
+                    }
                     Card card = deck.remove(deck.size() - 1);
                     dealerSum += card.getValue();
                     dealerAceCount += card.isAce() ? 1 : 0;
@@ -192,7 +207,11 @@ public class BlackJack {
         hiddenCard = deck.remove(deck.size()-1); //remove card at last index
         dealerSum += hiddenCard.getValue();
         dealerAceCount += hiddenCard.isAce() ? 1 : 0;
-
+        
+        if (deck.isEmpty()) {
+            throw new IllegalStateException("Deck is empty! Cannot draw more cards.");
+        }
+        
         Card card = deck.remove(deck.size()-1);
         dealerSum += card.getValue();
         dealerAceCount += card.isAce() ? 1 : 0;
